@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mert & Margit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500;1,600&family=Parisienne&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#0a0e24;
+    --bg-mid:#151a3d;
+    --bg-panel:#1b2050;
+    --gold:#e8b75d;
+    --rose:#f2a9be;
+    --cream:#f5f1e6;
+    --muted:#9fa1c9;
+    --line:rgba(232,183,93,0.25);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{ background:var(--bg-deep); color:var(--cream); font-family:'Cormorant Garamond', serif; overflow-x:hidden; position:relative; }
+  #stars{ position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+  .content{ position:relative; z-index:1; }
+
+  .eyebrow{ font-family:'Inter', sans-serif; font-size:0.72rem; letter-spacing:0.28em; text-transform:uppercase; color:var(--gold); }
+  .script{ font-family:'Parisienne', cursive; }
+
+  /* ---------- HERO ---------- */
+  .hero{ min-height:100svh; display:flex; align-items:center; justify-content:center; text-align:center; padding:6vh 6vw; }
+  .hero-inner{ max-width:640px; display:flex; flex-direction:column; align-items:center; gap:1.4rem; }
+  .hero-title{ font-size:clamp(3rem, 10vw, 5.5rem); line-height:1; display:flex; align-items:baseline; gap:0.6rem; flex-wrap:wrap; justify-content:center; }
+  .hero-title .script{ color:var(--rose); text-shadow:0 0 30px rgba(242,169,190,0.35); }
+  .hero-title .amp{ font-family:'Cormorant Garamond', serif; font-style:italic; color:var(--gold); font-size:0.8em; }
+  .hero-sub{ font-size:clamp(1.05rem, 2.4vw, 1.3rem); font-style:italic; color:var(--muted); max-width:32ch; }
+  .counter{ margin-top:1rem; padding:1.4rem 1.8rem; border:1px solid var(--line); border-radius:14px; background:rgba(27,32,80,0.4); backdrop-filter:blur(6px); display:flex; flex-direction:column; gap:0.8rem; align-items:center; }
+  .counter-row{ display:flex; align-items:center; gap:0.6rem; font-family:'Inter',sans-serif; font-size:0.78rem; color:var(--muted); }
+  .counter-row input[type="date"]{ background:var(--bg-panel); color:var(--cream); border:1px solid var(--line); border-radius:6px; padding:0.3rem 0.5rem; font-family:'Inter',sans-serif; font-size:0.8rem; }
+  .counter-display{ display:flex; align-items:baseline; gap:0.5rem; }
+  #day-count{ font-size:2.4rem; color:var(--gold); font-weight:600; }
+  .counter-label{ font-family:'Inter',sans-serif; font-size:0.78rem; color:var(--muted); }
+  .scroll-cta{ margin-top:1.6rem; background:none; border:1px solid var(--gold); color:var(--gold); font-family:'Inter',sans-serif; font-size:0.82rem; letter-spacing:0.05em; padding:0.7rem 1.5rem; border-radius:999px; cursor:pointer; transition:all .3s ease; }
+  .scroll-cta:hover{ background:var(--gold); color:var(--bg-deep); }
+
+  /* ---------- SECTION SHARED ---------- */
+  section{ padding:9vh 6vw; position:relative; }
+  .section-title{ font-size:clamp(2.1rem, 5vw, 3rem); text-align:center; margin-bottom:0.4rem; font-style:italic; }
+  .section-sub{ text-align:center; color:var(--muted); font-family:'Inter',sans-serif; font-size:0.9rem; margin-bottom:3.4rem; letter-spacing:0.02em; }
+
+  [contenteditable]{ outline:none; border-radius:6px; transition:background .2s ease; }
+  [contenteditable]:hover{ background:rgba(232,183,93,0.07); }
+  [contenteditable]:focus{ background:rgba(232,183,93,0.12); box-shadow:0 0 0 1px var(--line); }
+  [contenteditable]:empty:before{ content:attr(data-placeholder); color:var(--muted); font-style:italic; }
+
+  .nav-btn{ font-family:'Inter',sans-serif; font-size:0.85rem; background:none; color:var(--gold); border:1px solid var(--line); border-radius:999px; padding:0.55rem 1.2rem; cursor:pointer; transition:all .2s ease; }
+  .nav-btn:hover{ background:var(--gold); color:var(--bg-deep); }
+  .nav-btn:disabled{ opacity:0.3; cursor:default; background:none; color:var(--gold); }
+
+  /* ---------- TIMELINE ---------- */
+  .timeline{ max-width:900px; margin:0 auto 2rem; position:relative; }
+  .timeline-line{ position:absolute; top:0; left:50%; transform:translateX(-50%); height:100%; width:2px; z-index:0; }
+  .timeline-line path{ fill:none; stroke:var(--gold); stroke-width:2; stroke-dasharray:4 8; opacity:0.4; }
+  .timeline-item{ position:relative; z-index:1; display:flex; align-items:center; gap:2rem; margin-bottom:4rem; opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease; }
+  .timeline-item.in-view{ opacity:1; transform:translateY(0); }
+  .timeline-item.flip{ flex-direction:row-reverse; }
+  .timeline-item.flip .timeline-card{ text-align:right; }
+  .star-marker{ flex:0 0 auto; width:44px; height:44px; border-radius:50%; background:var(--bg-panel); border:1px solid var(--gold); color:var(--gold); display:flex; align-items:center; justify-content:center; font-size:1.2rem; box-shadow:0 0 18px rgba(232,183,93,0.25); }
+  .timeline-card{ flex:1; position:relative; }
+  .timeline-date{ font-family:'Inter',sans-serif; font-size:0.72rem; letter-spacing:0.1em; color:var(--rose); display:inline-block; margin-bottom:0.3rem; text-transform:uppercase; }
+  .timeline-card h3{ font-size:1.5rem; font-style:italic; margin-bottom:0.4rem; }
+  .timeline-card p{ color:var(--muted); font-size:1.02rem; line-height:1.5; }
+  .timeline-remove{ position:absolute; top:-6px; right:-6px; width:22px; height:22px; border-radius:50%; background:var(--bg-panel); border:1px solid var(--line); color:var(--muted); font-size:0.8rem; cursor:pointer; opacity:0; transition:opacity .2s ease; }
+  .timeline-item.flip .timeline-remove{ right:auto; left:-6px; }
+  .timeline-item:hover .timeline-remove{ opacity:1; }
+
+  @media (max-width:720px){
+    .timeline-line{ left:22px; }
+    .timeline-item, .timeline-item.flip{ flex-direction:row; text-align:left; }
+    .timeline-item.flip .timeline-card{ text-align:left; }
+    .star-marker{ width:36px; height:36px; }
+  }
+
+  /* ---------- LETTERS / NOTEBOOK ---------- */
+  .letters-section{ display:flex; flex-direction:column; align-items:center; }
+  .notebook-cover{ width:min(340px, 82vw); aspect-ratio:3/2; position:relative; cursor:pointer; background:linear-gradient(135deg, var(--bg-panel), var(--bg-mid)); border:1px solid var(--line); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:0.8rem; transition:transform .3s ease; box-shadow:0 10px 40px rgba(0,0,0,0.4); }
+  .notebook-cover:hover{ transform:translateY(-4px); }
+  .notebook-seal{ width:52px; height:52px; border-radius:50%; background:var(--rose); color:var(--bg-deep); display:flex; align-items:center; justify-content:center; font-size:1.4rem; box-shadow:0 0 24px rgba(242,169,190,0.5); }
+  .notebook-hint{ font-family:'Inter',sans-serif; font-size:0.78rem; color:var(--muted); }
+  .notebook-hint.small{ font-size:0.68rem; }
+  .notebook{ margin-top:2.5rem; max-width:600px; width:100%; display:none; perspective:1400px; }
+  .notebook.open{ display:block; }
+  .notebook-page-wrap{ position:relative; min-height:340px; }
+  .notebook-page{ background:var(--bg-panel); border:1px solid var(--line); border-radius:10px; padding:2.4rem 2.2rem 1.6rem; box-shadow:0 20px 60px rgba(0,0,0,0.4); display:none; transform-origin:left center; animation:pageIn .5s ease; }
+  .notebook-page.active{ display:block; }
+  @keyframes pageIn{ from{ opacity:0; transform:rotateY(-8deg) translateX(-10px);} to{ opacity:1; transform:rotateY(0) translateX(0);} }
+  .page-number{ font-family:'Inter',sans-serif; font-size:0.7rem; letter-spacing:0.1em; color:var(--gold); text-transform:uppercase; margin-bottom:1rem; display:block; }
+  .letter-content{ font-size:1.15rem; line-height:1.8; min-height:180px; white-space:pre-wrap; }
+  .notebook-nav{ display:flex; align-items:center; justify-content:space-between; margin-top:1.4rem; gap:1rem; }
+  .page-dots{ display:flex; gap:0.4rem; flex-wrap:wrap; justify-content:center; }
+  .page-dot{ width:8px; height:8px; border-radius:50%; background:var(--line); border:none; cursor:pointer; padding:0; transition:background .2s ease, transform .2s ease; }
+  .page-dot.active{ background:var(--gold); transform:scale(1.3); }
+
+  /* ---------- GALLERY ---------- */
+  .gallery-grid{ max-width:900px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:0.9rem; }
+  .gallery-item{ position:relative; aspect-ratio:1; border-radius:10px; overflow:hidden; border:1px solid var(--line); cursor:pointer; }
+  .gallery-item img{ width:100%; height:100%; object-fit:cover; display:block; transition:transform .3s ease; }
+  .gallery-item:hover img{ transform:scale(1.06); }
+  .gallery-delete{ position:absolute; top:6px; right:6px; width:24px; height:24px; border-radius:50%; background:rgba(10,14,36,0.75); color:var(--cream); border:1px solid var(--line); font-size:0.85rem; cursor:pointer; opacity:0; transition:opacity .2s ease; }
+  .gallery-item:hover .gallery-delete{ opacity:1; }
+  .gallery-add{ aspect-ratio:1; border-radius:10px; border:1px dashed var(--line); background:rgba(27,32,80,0.3); color:var(--gold); font-family:'Inter',sans-serif; font-size:0.85rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.3rem; transition:all .2s ease; }
+  .gallery-add:hover{ background:rgba(232,183,93,0.1); }
+  .gallery-add span{ font-size:1.8rem; line-height:1; }
+  .gallery-empty-note{ text-align:center; font-family:'Inter',sans-serif; font-size:0.78rem; color:var(--muted); margin-top:1.4rem; }
+
+  .lightbox{ position:fixed; inset:0; background:rgba(6,8,22,0.92); z-index:50; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; padding:2rem; backdrop-filter:blur(4px); }
+  .lightbox.hidden{ display:none; }
+  .lightbox img{ max-width:min(90vw, 700px); max-height:70vh; border-radius:10px; box-shadow:0 20px 60px rgba(0,0,0,0.6); }
+  .lightbox-caption{ max-width:600px; text-align:center; font-size:1.1rem; font-style:italic; color:var(--muted); min-height:1.6rem; }
+  .lightbox-close{ position:absolute; top:1.5rem; right:2rem; background:none; border:none; color:var(--cream); font-size:2rem; cursor:pointer; line-height:1; }
+
+  /* ---------- CARDS GAME ---------- */
+  .game-section{ text-align:center; }
+  .cards-grid{ max-width:640px; margin:0 auto; display:grid; grid-template-columns:repeat(5, 1fr); gap:0.6rem; }
+  .card{ aspect-ratio:3/4; perspective:900px; cursor:pointer; max-width:100px; margin:0 auto; width:100%; }
+  .card-inner{ position:relative; width:100%; height:100%; transition:transform .6s cubic-bezier(.4,.2,.2,1); transform-style:preserve-3d; }
+  .card.flipped .card-inner{ transform:rotateY(180deg); }
+  .card-front, .card-back{ position:absolute; inset:0; backface-visibility:hidden; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0.4rem; text-align:center; }
+  .card-front{ background:linear-gradient(145deg,var(--bg-panel),var(--bg-mid)); border:1px solid var(--line); font-size:1rem; color:var(--gold); }
+  .card-back{ background:linear-gradient(145deg,#241a5c,#171245); border:1px solid var(--gold); transform:rotateY(180deg); font-style:italic; font-size:0.62rem; line-height:1.3; color:var(--cream); overflow:hidden; }
+  .card-back .editable{ width:100%; }
+  .cards-add-wrap{ text-align:center; margin-top:1.6rem; }
+  @media (max-width:640px){ .cards-grid{ grid-template-columns:repeat(3, 1fr); } .card{ max-width:120px; } }
+
+  /* ---------- PROPOSAL ---------- */
+  .proposal-section{ min-height:100svh; display:flex; align-items:center; justify-content:center; text-align:center; position:relative; }
+  .lock-overlay{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(10,14,36,0.75); backdrop-filter:blur(3px); z-index:5; font-family:'Inter',sans-serif; color:var(--muted); font-size:0.9rem; letter-spacing:0.03em; transition:opacity .6s ease; text-align:center; padding:0 2rem; }
+  .lock-overlay.gone{ opacity:0; pointer-events:none; }
+  .proposal-content{ max-width:560px; display:flex; flex-direction:column; align-items:center; gap:1.1rem; }
+
+  .ring-box-wrap{ width:130px; height:120px; position:relative; margin-bottom:0.6rem; perspective:600px; cursor:pointer; }
+  .ring-box-wrap.open{ cursor:default; }
+  .box-hint{ font-family:'Inter',sans-serif; font-size:0.78rem; color:var(--muted); letter-spacing:0.02em; opacity:1; transition:opacity .4s ease; margin-bottom:0.4rem; }
+  .proposal-content.revealed .box-hint{ opacity:0; pointer-events:none; }
+  .ring-box-base{ width:110px; height:64px; position:absolute; bottom:0; left:10px; border-radius:8px; background:linear-gradient(145deg, #241a5c, #171245); border:1px solid var(--line); box-shadow:0 10px 30px rgba(0,0,0,0.5); }
+  .ring-box-lid{ width:110px; height:34px; position:absolute; top:16px; left:10px; border-radius:8px 8px 3px 3px; background:linear-gradient(145deg, var(--gold), #c9944a); transform-origin:bottom center; transform:rotateX(0deg); transition:transform 1.1s cubic-bezier(.34,1.56,.64,1); box-shadow:0 4px 10px rgba(0,0,0,0.4); }
+  .ring-box-wrap.open .ring-box-lid{ transform:rotateX(-125deg); }
+  .ring-emoji{ position:absolute; left:50%; top:30px; font-size:2.4rem; transform:translate(-50%, 10px) scale(0.3); opacity:0; transition:transform 1s cubic-bezier(.34,1.56,.64,1) .5s, opacity .6s ease .5s; }
+  .ring-box-wrap.open .ring-emoji{ transform:translate(-50%, -34px) scale(1); opacity:1; }
+  .sparkle{ position:absolute; color:var(--gold); font-size:0.9rem; opacity:0; transition:opacity .4s ease, transform .8s ease; }
+  .ring-box-wrap.open .sparkle{ opacity:1; animation:twinkle 1.6s ease-in-out infinite; }
+  .sp1{ top:8px; left:14px; transition-delay:.9s; }
+  .sp2{ top:2px; right:10px; transition-delay:1.05s; }
+  .sp3{ top:34px; right:0; transition-delay:1.2s; }
+  @keyframes twinkle{ 0%,100%{ opacity:0.4; transform:scale(0.8);} 50%{ opacity:1; transform:scale(1.15);} }
+
+  .proposal-title{ font-size:clamp(2.4rem,6vw,3.2rem); font-style:italic; color:var(--rose); opacity:0; transform:translateY(10px); transition:opacity .6s ease .9s, transform .6s ease .9s; }
+  .proposal-text{ font-size:1.15rem; line-height:1.7; color:var(--cream); opacity:0; transform:translateY(10px); transition:opacity .6s ease 1.2s, transform .6s ease 1.2s; }
+  .proposal-question{ font-size:clamp(1.6rem,4vw,2.1rem); font-style:italic; color:var(--gold); margin-top:0.4rem; opacity:0; transform:translateY(10px); transition:opacity .6s ease 1.6s, transform .6s ease 1.6s; }
+  .proposal-content.revealed .proposal-title, .proposal-content.revealed .proposal-text, .proposal-content.revealed .proposal-question, .proposal-content.revealed .proposal-buttons{ opacity:1; transform:translateY(0); }
+  .proposal-buttons{ display:flex; gap:1.2rem; margin-top:1rem; position:relative; height:60px; align-items:center; justify-content:center; width:100%; opacity:0; transform:translateY(10px); transition:opacity .6s ease 1.9s, transform .6s ease 1.9s; }
+  .btn-yes, .btn-no{ font-family:'Inter',sans-serif; font-size:0.95rem; padding:0.9rem 1.8rem; border-radius:999px; cursor:pointer; border:1px solid var(--line); }
+  .btn-yes{ background:var(--gold); color:var(--bg-deep); border:none; font-weight:600; }
+  .btn-no{ background:none; color:var(--muted); position:absolute; }
+  .celebration{ display:flex; flex-direction:column; align-items:center; gap:1rem; }
+  .celebration.hidden{ display:none; }
+  .celebration h2{ font-size:clamp(2rem,5vw,2.8rem); font-style:italic; color:var(--rose); }
+  .celebration p{ max-width:480px; font-size:1.1rem; color:var(--muted); line-height:1.6; }
+  #confetti{ position:fixed; inset:0; pointer-events:none; z-index:20; }
+
+  footer{ text-align:center; padding:4rem 2rem 3rem; font-family:'Parisienne',cursive; font-size:1.4rem; color:var(--muted); }
+
+  @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<div class="content">
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow editable" contenteditable data-key="hero-eyebrow" data-placeholder="our story">our story</p>
+      <h1 class="hero-title"><span class="script">Mert</span><span class="amp">&</span><span class="script">Margit</span></h1>
+      <p class="hero-sub editable" contenteditable data-key="hero-sub" data-placeholder="One sky, two stars, a story that keeps shining.">One sky, two stars, a story that keeps shining.</p>
+      <div class="counter">
+        <div class="counter-row">
+          <label>Where it began:</label>
+          <span id="start-date-display">August 27, 2024</span>
+        </div>
+        <div class="counter-display">
+          <span id="day-count">0</span>
+          <span class="counter-label">days together</span>
+        </div>
+      </div>
+      <button class="scroll-cta" onclick="document.getElementById('timeline-section').scrollIntoView({behavior:'smooth'})">Explore our story ↓</button>
+    </div>
+  </header>
+
+  <section id="timeline-section">
+    <p class="eyebrow" style="text-align:center; margin-bottom:0.6rem;">our constellation</p>
+    <h2 class="section-title">Our Memories</h2>
+    <p class="section-sub">Every line is yours to write — click to edit, or add a new star.</p>
+    <div class="timeline" id="timeline-list">
+      <svg class="timeline-line" viewBox="0 0 2 100" preserveAspectRatio="none"><path d="M1,0 L1,100" /></svg>
+    </div>
+    <div style="text-align:center;">
+      <button class="nav-btn" id="add-memory-btn">+ Add a memory</button>
+    </div>
+  </section>
+
+  <section id="letters" class="letters-section">
+    <p class="eyebrow" style="margin-bottom:0.6rem;">just for you</p>
+    <h2 class="section-title">Ten Letters</h2>
+    <p class="section-sub">A little notebook, one page at a time.</p>
+    <div class="notebook-cover" id="notebook-cover">
+      <div class="notebook-seal">✦</div>
+      <p class="notebook-hint">Tap to open the notebook</p>
+      <p class="notebook-hint small">10 letters inside</p>
+    </div>
+    <div class="notebook" id="notebook">
+      <div class="notebook-page-wrap" id="page-wrap"></div>
+      <div class="notebook-nav">
+        <button class="nav-btn" id="prev-btn">← Previous</button>
+        <div class="page-dots" id="page-dots"></div>
+        <button class="nav-btn" id="next-btn">Next →</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="gallery">
+    <p class="eyebrow" style="text-align:center; margin-bottom:0.6rem;">a few frames</p>
+    <h2 class="section-title">Our Gallery</h2>
+    <p class="section-sub">Add the photos that tell our story.</p>
+    <div class="gallery-grid" id="gallery-grid">
+      <button class="gallery-add" id="gallery-add-btn"><span>+</span>Add Photo</button>
+    </div>
+    <p class="gallery-empty-note">Photos are stored right in this browser, on this device.</p>
+    <input type="file" id="gallery-file-input" accept="image/*" multiple style="display:none">
+  </section>
+
+  <section id="game" class="game-section">
+    <p class="eyebrow" style="margin-bottom:0.6rem;">a small surprise</p>
+    <h2 class="section-title">Sweet Words</h2>
+    <p class="section-sub">Flip every card to unlock what's next. Click a flipped card's text to make it your own.</p>
+    <div class="cards-grid" id="cards-grid"></div>
+    <div class="cards-add-wrap">
+      <button class="nav-btn" id="add-card-btn">+ Add a card</button>
+    </div>
+    <p class="game-message" id="game-message">0 / 9 flipped</p>
+  </section>
+
+  <section id="proposal" class="proposal-section">
+    <div class="lock-overlay" id="lock-overlay">🔒&nbsp; Flip every card above to continue</div>
+    <div class="proposal-content" id="proposal-content">
+      <div class="ring-box-wrap" id="ring-box">
+        <div class="ring-box-lid"></div>
+        <div class="ring-box-base"></div>
+        <div class="ring-emoji">💍</div>
+        <span class="sparkle sp1">✦</span>
+        <span class="sparkle sp2">✦</span>
+        <span class="sparkle sp3">✦</span>
+      </div>
+      <p class="box-hint" id="box-hint">Tap the box to open it</p>
+      <div class="proposal-title">Margit,</div>
+      <p class="proposal-text editable" contenteditable data-key="proposal-text" data-placeholder="Write your final message here...">I love you more than anything in this world. Under all these stars, we always looked at the same one — and now I want to join my life with yours, today and every day after.</p>
+      <p class="proposal-question">Will you marry me?</p>
+      <div class="proposal-buttons">
+        <button class="btn-yes" id="yes-btn">Yes 💍</button>
+        <button class="btn-no" id="no-btn">No</button>
+      </div>
+    </div>
+    <div class="celebration hidden" id="celebration">
+      <h2>I love you, Margit 💍</h2>
+      <p class="editable" contenteditable data-key="celebration-text" data-placeholder="From today, forever...">From today, forever. This is only the beginning.</p>
+    </div>
+  </section>
+
+  <footer>Mert &amp; Margit</footer>
+
+</div>
+
+<div class="lightbox hidden" id="lightbox">
+  <button class="lightbox-close" id="lightbox-close">×</button>
+  <img id="lightbox-img" src="" alt="">
+  <p class="lightbox-caption editable" contenteditable id="lightbox-caption" data-placeholder="Add a caption..."></p>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+/* ---------------- storage helpers (localStorage, works on any host) ---------------- */
+const STORAGE_PREFIX = 'mert-margit:';
+async function getVal(key){
+  try{ return localStorage.getItem(STORAGE_PREFIX + key); }catch(e){ return null; }
+}
+async function setVal(key, value){
+  try{ localStorage.setItem(STORAGE_PREFIX + key, value); }catch(e){ console.error('storage set failed', e); }
+}
+async function deleteVal(key){
+  try{ localStorage.removeItem(STORAGE_PREFIX + key); }catch(e){ /* ignore */ }
+}
+function debounce(fn, wait){
+  let t;
+  return (...args)=>{ clearTimeout(t); t = setTimeout(()=>fn(...args), wait); };
+}
+
+/* ---------------- simple editable fields (hero, proposal texts) ---------------- */
+async function initEditables(){
+  const els = document.querySelectorAll('[data-key]');
+  for(const el of els){
+    const stored = await getVal(el.dataset.key);
+    if(stored !== null && stored !== undefined && stored !== ''){
+      if(el.tagName === 'INPUT'){ el.value = stored; }
+      else { el.innerText = stored; }
+    }
+  }
+}
+document.querySelectorAll('[contenteditable][data-key]').forEach(el=>{
+  const save = debounce(()=> setVal(el.dataset.key, el.innerText), 500);
+  el.addEventListener('input', save);
+});
+
+/* ---------------- day counter ---------------- */
+const START_DATE = '2024-08-27';
+const dayCountEl = document.getElementById('day-count');
+function updateDayCount(){
+  const start = new Date(START_DATE + 'T00:00:00');
+  const now = new Date();
+  const diff = Math.floor((now - start) / (1000*60*60*24));
+  dayCountEl.textContent = diff >= 0 ? diff : 0;
+}
+
+/* ---------------- starfield ---------------- */
+const starsCanvas = document.getElementById('stars');
+const sctx = starsCanvas.getContext('2d');
+let stars = [];
+function resizeStars(){
+  starsCanvas.width = window.innerWidth;
+  starsCanvas.height = document.body.scrollHeight;
+  const count = Math.floor((starsCanvas.width * starsCanvas.height) / 9000);
+  stars = Array.from({length: count}, () => ({
+    x: Math.random() * starsCanvas.width,
+    y: Math.random() * starsCanvas.height,
+    r: Math.random() * 1.3 + 0.3,
+    phase: Math.random() * Math.PI * 2,
+    speed: 0.01 + Math.random() * 0.02
+  }));
+}
+function drawStars(t){
+  sctx.clearRect(0,0,starsCanvas.width, starsCanvas.height);
+  for(const s of stars){
+    const alpha = 0.35 + 0.5 * Math.abs(Math.sin(s.phase + t * s.speed));
+    sctx.beginPath();
+    sctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    sctx.fillStyle = `rgba(245,241,230,${alpha})`;
+    sctx.fill();
+  }
+  requestAnimationFrame(drawStars);
+}
+window.addEventListener('resize', resizeStars);
+
+/* ---------------- dynamic timeline ---------------- */
+const timelineList = document.getElementById('timeline-list');
+const timelinePath = document.querySelector('#timeline-list path');
+let timelineData = [];
+const DEFAULT_TIMELINE = [
+  {
+    "date": "JULY 2024",
+    "title": "How We Met At First",
+    "desc": "While i was decided to start playing Guild Wars 2, i would never think i will find the girl that will be my wife. I started to play, needed a guild and saw you are recruiting newbies, sent message to you and you accepted me. I am not very social person so in first times i was not active so much. Then after i see how good, how kind person you are, i wanted to talk with you. Not much time, only one week or few weeks, you were not knowing still but i was fell in love with you already. My soul felt it found it's other half, i felt i complete my heart with this girl, as we say in here, i felt like got shot to my heart. Since that day nothing was same, i was waking up with so much love, i was waiting you to log in impatiently. If you werent online, i was logging out too. I did everything to get attention from you, i donated many things to guild, i worked so hard for achieving things to say \"look i got it!\". It was all for taking your attention, finding some excuse to talk with you again, it was all because of trying to make you fall in love with me."
+  },
+  {
+    "date": "AUGUST 2024",
+    "title": "The First \"I Love You\"",
+    "desc": "This day came. We were decided to open ourselves to each other. We wanted to let other one know that we love each other. When the first time we say we love each other, you should have see my heart, see my soul. My heart was beating so fast with the love, my soul was so happy so peaceful because it's other half wanted to be with it. And me... I was the happiest man in the world because of the dream woman, the girl that i love her while she does not even know, the angel was became mine. At that day my all dreams came true and we started to this journey."
+  },
+  {
+    "date": "SEPTEMBER 2024",
+    "title": "First Time We Hear Each Other's Voice",
+    "desc": "We were loving each other crazily. We talked weeks, with the love that is increasing every second, day by day. I was living my best days of my life. But i thought they were best day of my life. I was not even know i will have much more better days which makes my life dream. Even without seeing you, i was feeling like this. I was waking up to feel your love, i was craving for your love. But i dont know how did you do this, how could i love someone that i dont see? I believed its possible when my heart started to beat for you. Then we decided to be closer, because both of us wanted to love each other more, it was not enough. So, we wanted to hear each other's voice at least. With a sooooooooo much shyness, we finally sent little voice messages and when i heard your beautiful voice on that day... I was flying in the sky because of happiness, i dont know how many times i listened your voice message, everytime when i hear your voice my heart was beating crazily. It was the most beautiful voice i've ever heard and will heard in my life. I was so shy to send voice messages but i wanted to send more and more because i needed your voice so much. Everytime when i listen your voice message, as we say i was scattering butterflies everywhere, my face was smiling all day. Who would say a girl that i did not even see could make me the happiest man in the world..."
+  },
+  {
+    "date": "SEPTEMBER 2024",
+    "title": "First Time We See Each Other",
+    "desc": "This day came, we finally decided to see who are we loving this much, who is the person that makes us the happiest persons when we hear the voices of it, who is the person that completes our soul, who is the person who fills our heart with the most beautiful love in the world. With all of your sillyness, i insisted much and convinced you to show yourself to me, but i have to confess while taking picture i thinked thousands of times, took many pictures until i like. Because i didnt want to lose this angel, i didnt want to lose my other half because of i dont find myself handsome. You were thinking same too, just i was more brave :) After you sent your picture, i saw the woman that i wanna be. You were so beautiful as always, you made me fall in love again and again. Everytime when i open your picture, i was falling in love again, i was feeling i have the most gorgeous girl in the world. But while feeling like this, i was hoping so much for you to like me, because i was believing if you like me i will be the happiest man in the world for years, maybe for all my life. You liked me too (somehow :P) and you made me the happiest man in the world again. I was sure my dream is started..."
+  },
+  {
+    "date": "SEPTEMBER 2024",
+    "title": "The Silly Breakup",
+    "desc": "We were so happy with together and believing we found the true love with each other. But there were problem.. You did not give chance we can be together, we can meet, we can go somewhere. And you were right maybe, because i could not say we can do it somehow. But i did not want to lose my life, lose my true love. Because really you were my everything, my life, my only true love and my reason to live already. It was hard decision, we broke up. We cried, we felt like we are dying, we felt like we lost our everything. Were we crazy? Because its only around 2 weeks passed after we say i love you to each other. Why it was hurting this much? No one could understand. Only one day we did not talk with each other. We lived in pain, i left the guild. Respected your decision, uninstalled game and wanted to disappear from your life. After i leave, you said you wanted to see my name in the guild. I installed the game again, joined the guild and logout. Kept crying at the day, tried to live with the pain. I was thinking why it hurts this much? Answer was obvious.. You were my everything already and i lost my everything. But i could not understand at that moment."
+  },
+  {
+    "date": "SEPTEMBER 2024",
+    "title": "Being One Again",
+    "desc": "After the day when i woke up, nothing was same. I did not want to wake up, i did not want to eat, i did not want to sleep, i did not want to live at all. I was not have any happiness, any will to live. What was happened? I was died? With a hope of being together again, i opened the game. I dont know how many times i checked you are online. We were broke up but me, my heart, my soul did not break up with you. I was craving for your love, for your beautiful voice, for your presence that makes me feel alive. After i saw you are online, i was begging for you to send message to me from inside. I needed you like water, like air. But i could not write. Because i did not want to break up at all. So i was only waited impatiently you to write to me again and being with you to change my life into a dream again. And you wrote, my heart started to beat again, my life started again, my happiness came back again. I wanted to live more and more, i wanted to live this life with you only, every second, every moment. You could not endure without me too, and we were as one again :) It was my one of the happiest day in the world."
+  },
+  {
+    "date": "SEPTEMBER 2024",
+    "title": "Mini Breakup (Going Military)",
+    "desc": "We were so happy again, we were the happiest couple in the world. We were making each other's life into a dream. But... I need to go now for a while, i wont be here for a month. Yes we were not together already in real life, but the place that im going was not letting you bring new phones either. What to do.. What to do... I thought i can call you, whatever it costs, i wanted to hear your voice everyday. But it was have limit, even its weekend, we cant talk all day. What to do... I invented a solution to talk with you from Facebook. Everything is good but... Military does not accept phones with internet, with camera, they do not even accept my own SIM card. We went to buy phone with dad many times. Everytime i told the same lie to him. I want phone with the internet because of looking things, maybe we can talk from internet too with you dad. We could not find, phones with the internet have camera and its visible, if they would see, i would be done. Dad asked to me many times to buy normal ones. I refused everytime. Everything was talking for you even for once in a day. Phone i bought was have camera too, we hided it with a black tape. It was visible easily but i hoped and prayed to God for them to not see.\n\n\n\nWhile i did these things, i was have another fear. What if you lose your interest to me while i am not here? How would i live without you? Thats why i was ready to do anything. During military controls, soldiers asked me for SIM card, do i have? I was hided it in my shoes. I said i have not with a hope they wont search me as detailed. After i pass from x-ray, soldier yelled, \"He has 2 phone in here!\". One of them was fake to say look it does not have camera. I was begging to God, please dont take the chance of talking with Margit from me. Thanks to God, it did not happen and i was so happy."
+  },
+  {
+    "date": "OCTOBER 2024",
+    "title": "Returning From Military",
+    "desc": "I was freeeeeee! Hugged my mom and dad and asked the phone immediately. Opened discord and wrote to you. You can not even guess how was excited i am, how much i was needed this. We were together againnnnnnnnn! And it was time to say i have a girlfriend (for family), other half(for me) to my parents. While returning to home, on the way i told them we are together, we are happy, from where are you, everything. And expected them to support me for this so much. And they supported me yaaaaaaay! You were officially in the familyyyyyyyy."
+  },
+  {
+    "date": "NOVEMBER 2024",
+    "title": "Our First Meeting",
+    "desc": "We've finally decided to see each other, feel each other. We were crazy in love to give our everything for feeling each other. So we wanted to go holiday together in our first meeting. You were crazy enough to go another country with a plane that you never did in your life for a random man. I was crazy enough to set everything for a random girl and go holiday with her. After you land and i was waiting you, i was not even know how you look, who i am waiting for. I waited, waited, waited. Then you appeared, with your beautiful smile, you came to me. We let our suitcases beside and hugged each other. I dont even remember what happened at that time. With your words, i shaked so much. I felt my other half completed when i hugged you for the first time. I felt your love and love that i feel to you. I would never say beside of kiss, we will touch to each other. But in first day, something pulled me to you, also pulled you to me. We kissed for 4 hours nonstop, like we are in desert and craving for water, could not get enough, we kissed more and more and more. We felt each other so much. I never felt this much love, this much passion in my life. On that day, i was sure we love each other truly and infinitely. When we sleep together, when we eat together, when i hold your hand, when i feel your skin, when i feel your lips, when i feel your touch, my heart fulfilled with your beautiful love more and more. And when you see the sea first time in your life, how you hugged me, how your eyes were wet affected me so much. It was one of the moment that i can never forget. And also... When we danced at night in the shore, i wanted to freeze the time. You made me experience the true love, the true taste of the life. Our real journey started with this holiday..."
+  }
+];
+
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{ if(entry.isIntersecting){ entry.target.classList.add('in-view'); } });
+}, { threshold: 0.3 });
+
+function saveTimeline(){ setVal('timeline-data', JSON.stringify(timelineData)); }
+
+function renderTimeline(){
+  timelineList.querySelectorAll('.timeline-item').forEach(el=>el.remove());
+  timelineData.forEach((item, i)=>{
+    const el = document.createElement('div');
+    el.className = 'timeline-item' + (i % 2 === 1 ? ' flip' : '');
+    el.innerHTML = `
+      <div class="star-marker">✦</div>
+      <div class="timeline-card">
+        <button class="timeline-remove" aria-label="remove memory">×</button>
+        <span class="timeline-date editable" contenteditable data-placeholder="Date">${item.date}</span>
+        <h3 class="editable" contenteditable data-placeholder="Title">${item.title}</h3>
+        <p class="editable" contenteditable data-placeholder="Tell that day here...">${item.desc}</p>
+      </div>`;
+    const [dateEl, titleEl, descEl] = el.querySelectorAll('.editable');
+    const saveField = debounce((field, val)=>{ timelineData[i][field] = val; saveTimeline(); }, 500);
+    dateEl.addEventListener('input', ()=> saveField('date', dateEl.innerText));
+    titleEl.addEventListener('input', ()=> saveField('title', titleEl.innerText));
+    descEl.addEventListener('input', ()=> saveField('desc', descEl.innerText));
+    el.querySelector('.timeline-remove').addEventListener('click', ()=>{
+      timelineData.splice(i,1);
+      saveTimeline();
+      renderTimeline();
+    });
+    timelineList.appendChild(el);
+    io.observe(el);
+  });
+}
+document.getElementById('add-memory-btn').addEventListener('click', ()=>{
+  timelineData.push({ date:'Date', title:'New Memory', desc:'Tell this story...' });
+  saveTimeline();
+  renderTimeline();
+  const items = timelineList.querySelectorAll('.timeline-item');
+  const last = items[items.length-1];
+  if(last) last.scrollIntoView({ behavior:'smooth', block:'center' });
+});
+async function loadTimeline(){
+  const raw = await getVal('timeline-data');
+  timelineData = raw ? JSON.parse(raw) : DEFAULT_TIMELINE.map(x=>({...x}));
+  renderTimeline();
+}
+
+const timelineSection = document.getElementById('timeline-section');
+function updateTimelinePath(){
+  if(!timelinePath) return;
+  const len = timelinePath.getTotalLength();
+  timelinePath.style.strokeDasharray = len;
+  const rect = timelineSection.getBoundingClientRect();
+  const visible = Math.min(1, Math.max(0, (window.innerHeight * 0.8 - rect.top) / rect.height));
+  timelinePath.style.strokeDashoffset = len * (1 - visible);
+}
+window.addEventListener('scroll', updateTimelinePath);
+
+/* ---------------- notebook of letters ---------------- */
+const TOTAL_LETTERS = 10;
+const pageWrap = document.getElementById('page-wrap');
+const pageDots = document.getElementById('page-dots');
+let currentPage = 0;
+
+function buildNotebook(){
+  for(let i=0;i<TOTAL_LETTERS;i++){
+    const page = document.createElement('div');
+    page.className = 'notebook-page' + (i===0 ? ' active' : '');
+    page.dataset.index = i;
+    page.innerHTML = `
+      <span class="page-number">Letter ${i+1} of ${TOTAL_LETTERS}</span>
+      <div class="letter-content editable" contenteditable data-key="letter-${i}" data-placeholder="Dear Margit, write whatever you'd like here...">Dear Margit, write whatever you'd like here...</div>
+    `;
+    pageWrap.appendChild(page);
+
+    const dot = document.createElement('button');
+    dot.className = 'page-dot' + (i===0 ? ' active' : '');
+    dot.setAttribute('aria-label', 'Go to letter ' + (i+1));
+    dot.addEventListener('click', ()=> goToPage(i));
+    pageDots.appendChild(dot);
+  }
+  pageWrap.querySelectorAll('[contenteditable][data-key]').forEach(el=>{
+    const save = debounce(()=> setVal(el.dataset.key, el.innerText), 500);
+    el.addEventListener('input', save);
+  });
+}
+function goToPage(i){
+  if(i < 0 || i >= TOTAL_LETTERS) return;
+  currentPage = i;
+  pageWrap.querySelectorAll('.notebook-page').forEach(p=>{ p.classList.toggle('active', Number(p.dataset.index) === i); });
+  pageDots.querySelectorAll('.page-dot').forEach((d, idx)=>{ d.classList.toggle('active', idx === i); });
+  document.getElementById('prev-btn').disabled = (i === 0);
+  document.getElementById('next-btn').disabled = (i === TOTAL_LETTERS - 1);
+}
+document.getElementById('prev-btn').addEventListener('click', ()=> goToPage(currentPage - 1));
+document.getElementById('next-btn').addEventListener('click', ()=> goToPage(currentPage + 1));
+
+const notebookCover = document.getElementById('notebook-cover');
+const notebook = document.getElementById('notebook');
+notebookCover.addEventListener('click', ()=>{
+  notebookCover.style.display = 'none';
+  notebook.classList.add('open');
+  goToPage(0);
+});
+
+/* ---------------- gallery ---------------- */
+const galleryGrid = document.getElementById('gallery-grid');
+const galleryAddBtn = document.getElementById('gallery-add-btn');
+const galleryFileInput = document.getElementById('gallery-file-input');
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightbox-img');
+const lightboxCaption = document.getElementById('lightbox-caption');
+const lightboxClose = document.getElementById('lightbox-close');
+let galleryIndex = [];
+let activePhotoId = null;
+
+async function loadGallery(){
+  const raw = await getVal('gallery-index');
+  galleryIndex = raw ? JSON.parse(raw) : [];
+  for(const item of galleryIndex){
+    const data = await getVal('gallery-photo-' + item.id);
+    if(data) addThumb(item, data);
+  }
+}
+function saveGalleryIndex(){ setVal('gallery-index', JSON.stringify(galleryIndex)); }
+
+function addThumb(item, dataUrl){
+  const wrap = document.createElement('div');
+  wrap.className = 'gallery-item';
+  wrap.dataset.id = item.id;
+  wrap.innerHTML = `<img src="${dataUrl}" alt=""><button class="gallery-delete" aria-label="Delete photo">×</button>`;
+  wrap.querySelector('img').addEventListener('click', ()=> openLightbox(item, dataUrl));
+  wrap.querySelector('.gallery-delete').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    galleryIndex = galleryIndex.filter(g => g.id !== item.id);
+    saveGalleryIndex();
+    deleteVal('gallery-photo-' + item.id);
+    wrap.remove();
+  });
+  galleryGrid.insertBefore(wrap, galleryAddBtn);
+}
+
+function compressImage(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const maxDim = 1100;
+        let { width, height } = img;
+        if(width > height && width > maxDim){ height = Math.round(height * maxDim/width); width = maxDim; }
+        else if(height > maxDim){ width = Math.round(width * maxDim/height); height = maxDim; }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.72));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+galleryAddBtn.addEventListener('click', ()=> galleryFileInput.click());
+galleryFileInput.addEventListener('change', async ()=>{
+  const files = Array.from(galleryFileInput.files || []);
+  for(const file of files){
+    try{
+      const dataUrl = await compressImage(file);
+      const id = Date.now() + '-' + Math.random().toString(36).slice(2,8);
+      const item = { id, caption:'' };
+      await setVal('gallery-photo-' + id, dataUrl);
+      galleryIndex.push(item);
+      saveGalleryIndex();
+      addThumb(item, dataUrl);
+    }catch(e){ console.error('photo add failed', e); }
+  }
+  galleryFileInput.value = '';
+});
+
+function openLightbox(item, dataUrl){
+  activePhotoId = item.id;
+  lightboxImg.src = dataUrl;
+  lightboxCaption.innerText = item.caption || '';
+  lightbox.classList.remove('hidden');
+}
+function closeLightbox(){ lightbox.classList.add('hidden'); activePhotoId = null; }
+lightboxClose.addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', (e)=>{ if(e.target === lightbox) closeLightbox(); });
+const saveCaption = debounce(()=>{
+  const item = galleryIndex.find(g => g.id === activePhotoId);
+  if(item){ item.caption = lightboxCaption.innerText; saveGalleryIndex(); }
+}, 500);
+lightboxCaption.addEventListener('input', saveCaption);
+
+/* ---------------- sweet-words card game ---------------- */
+const cardsGrid = document.getElementById('cards-grid');
+const gameMessage = document.getElementById('game-message');
+const DEFAULT_CARDS = ["", "", "", "", "", "", "", "", ""];
+let cardsData = [];
+let flippedSet = new Set();
+
+async function loadCards(){
+  const raw = await getVal('cards-data');
+  cardsData = raw ? JSON.parse(raw) : [...DEFAULT_CARDS];
+  renderCards();
+}
+function saveCards(){ setVal('cards-data', JSON.stringify(cardsData)); }
+
+function renderCards(){
+  cardsGrid.innerHTML = '';
+  cardsData.forEach((text, i)=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.index = i;
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="card-front">✦</div>
+        <div class="card-back">
+          <div class="card-text editable" contenteditable data-placeholder="Write something sweet...">${text}</div>
+        </div>
+      </div>`;
+    const textEl = card.querySelector('.card-text');
+    textEl.addEventListener('click', (e)=> e.stopPropagation());
+    textEl.addEventListener('input', debounce(()=>{
+      cardsData[i] = textEl.innerText;
+      saveCards();
+    }, 500));
+    card.addEventListener('click', ()=>{
+      if(flippedSet.has(i)) return;
+      flippedSet.add(i);
+      card.classList.add('flipped');
+      gameMessage.textContent = flippedSet.size + ' / ' + cardsData.length + ' flipped';
+      if(flippedSet.size === cardsData.length){
+        gameMessage.textContent = 'You flipped them all ✦ Scroll down.';
+        unlockProposal();
+      }
+    });
+    cardsGrid.appendChild(card);
+  });
+  gameMessage.textContent = flippedSet.size + ' / ' + cardsData.length + ' flipped';
+}
+
+document.getElementById('add-card-btn').addEventListener('click', ()=>{
+  cardsData.push('');
+  saveCards();
+  renderCards();
+});
+
+function unlockProposal(){
+  const overlay = document.getElementById('lock-overlay');
+  overlay.classList.add('gone');
+  setVal('cards-complete', 'true');
+}
+
+/* ---------------- proposal ---------------- */
+const yesBtn = document.getElementById('yes-btn');
+const noBtn = document.getElementById('no-btn');
+const proposalContent = document.getElementById('proposal-content');
+const celebration = document.getElementById('celebration');
+const proposalButtons = document.querySelector('.proposal-buttons');
+const ringBox = document.getElementById('ring-box');
+let ringPlayed = false;
+
+function playRingAnimation(){
+  if(ringPlayed) return;
+  ringPlayed = true;
+  requestAnimationFrame(()=>{
+    ringBox.classList.add('open');
+    setTimeout(()=> proposalContent.classList.add('revealed'), 200);
+  });
+}
+ringBox.addEventListener('click', ()=>{
+  if(ringPlayed) return;
+  playRingAnimation();
+  setVal('box-opened', 'true');
+});
+
+function dodgeNo(){
+  const container = proposalButtons.getBoundingClientRect();
+  const maxX = Math.max(container.width - noBtn.offsetWidth - 20, 60);
+  const maxY = Math.max(container.height - noBtn.offsetHeight - 10, 30);
+  const x = (Math.random() - 0.5) * maxX;
+  const y = (Math.random() - 0.5) * maxY;
+  noBtn.style.transform = `translate(${x}px, ${y}px)`;
+}
+noBtn.addEventListener('mouseenter', dodgeNo);
+noBtn.addEventListener('touchstart', dodgeNo, { passive:true });
+document.addEventListener('mousemove', (e)=>{
+  const rect = noBtn.getBoundingClientRect();
+  const cx = rect.left + rect.width/2;
+  const cy = rect.top + rect.height/2;
+  const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
+  if(dist < 90){ dodgeNo(); }
+});
+
+yesBtn.addEventListener('click', ()=>{
+  proposalContent.style.display = 'none';
+  celebration.classList.remove('hidden');
+  setVal('proposal-answered', 'yes');
+  launchConfetti();
+});
+
+/* ---------------- confetti ---------------- */
+const confettiCanvas = document.getElementById('confetti');
+const cctx = confettiCanvas.getContext('2d');
+let particles = [];
+let confettiFrames = 0;
+function launchConfetti(){
+  confettiCanvas.width = window.innerWidth;
+  confettiCanvas.height = window.innerHeight;
+  const colors = ['#e8b75d','#f2a9be','#f5f1e6','#9fa1c9'];
+  particles = Array.from({length: 140}, () => ({
+    x: Math.random() * confettiCanvas.width,
+    y: -20 - Math.random()*confettiCanvas.height*0.5,
+    r: 3 + Math.random()*4,
+    c: colors[Math.floor(Math.random()*colors.length)],
+    vy: 2 + Math.random()*3,
+    vx: -1.5 + Math.random()*3,
+    rot: Math.random()*Math.PI,
+    vr: -0.1 + Math.random()*0.2
+  }));
+  confettiFrames = 0;
+  requestAnimationFrame(confettiTick);
+}
+function confettiTick(){
+  cctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+  let stillAlive = false;
+  for(const p of particles){
+    p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+    if(p.y < confettiCanvas.height + 20) stillAlive = true;
+    cctx.save();
+    cctx.translate(p.x, p.y);
+    cctx.rotate(p.rot);
+    cctx.fillStyle = p.c;
+    cctx.fillRect(-p.r, -p.r, p.r*2, p.r*2);
+    cctx.restore();
+  }
+  confettiFrames++;
+  if(stillAlive && confettiFrames < 260){ requestAnimationFrame(confettiTick); }
+  else { cctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height); }
+}
+
+/* ---------------- init ---------------- */
+async function init(){
+  resizeStars();
+  requestAnimationFrame(drawStars);
+  buildNotebook();
+  await loadTimeline();
+  await loadCards();
+  await loadGallery();
+  await initEditables();
+
+  updateDayCount();
+
+  const cardsComplete = await getVal('cards-complete');
+  if(cardsComplete === 'true'){
+    document.getElementById('lock-overlay').classList.add('gone');
+  }
+  const boxOpened = await getVal('box-opened');
+  if(boxOpened === 'true'){
+    playRingAnimation();
+  }
+  const answered = await getVal('proposal-answered');
+  if(answered === 'yes'){
+    proposalContent.style.display = 'none';
+    celebration.classList.remove('hidden');
+  }
+
+  setTimeout(()=>{ resizeStars(); updateTimelinePath(); }, 300);
+}
+window.addEventListener('load', init);
+</script>
+
+</body>
+</html>
