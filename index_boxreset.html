@@ -348,7 +348,6 @@
     <div class="celebration hidden" id="celebration">
       <h2>I love you, Margit 💍</h2>
       <p class="editable" contenteditable data-key="celebration-text" data-placeholder="From today, forever...">From today, forever. This is only the beginning.</p>
-      <button class="reset-box-btn" id="reset-celebration-btn" title="Close the box so you can open it again">↺ Reset the box</button>
     </div>
   </section>
 
@@ -887,19 +886,12 @@ ringBox.addEventListener('click', ()=>{
 });
 
 const resetBoxBtn = document.getElementById('reset-box-btn');
-const resetCelebrationBtn = document.getElementById('reset-celebration-btn');
-
-function resetBox(){
+resetBoxBtn.addEventListener('click', ()=>{
   ringPlayed = false;
   ringBox.classList.remove('open');
   proposalContent.classList.remove('revealed');
-  proposalContent.style.display = '';
-  celebration.classList.add('hidden');
   deleteVal('box-opened');
-  deleteVal('proposal-answered');
-}
-resetBoxBtn.addEventListener('click', resetBox);
-resetCelebrationBtn.addEventListener('click', resetBox);
+});
 
 function dodgeNo(){
   const container = proposalButtons.getBoundingClientRect();
