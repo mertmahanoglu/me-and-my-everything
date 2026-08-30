@@ -147,8 +147,6 @@
   .proposal-content{ max-width:560px; display:flex; flex-direction:column; align-items:center; gap:1.1rem; }
 
   .ring-box-wrap{ width:130px; height:120px; position:relative; margin-bottom:0.6rem; perspective:600px; cursor:pointer; }
-  .reset-box-btn{ font-family:'Inter',sans-serif; font-size:0.75rem; color:var(--muted); background:none; border:1px solid var(--line); border-radius:999px; padding:0.4rem 0.9rem; cursor:pointer; margin-top:0.6rem; opacity:0.7; transition:opacity .2s ease; }
-  .reset-box-btn:hover{ opacity:1; }
   .ring-box-wrap.open{ cursor:default; }
   .box-hint{ font-family:'Inter',sans-serif; font-size:0.78rem; color:var(--muted); letter-spacing:0.02em; opacity:1; transition:opacity .4s ease; margin-bottom:0.4rem; }
   .proposal-content.revealed .box-hint{ opacity:0; pointer-events:none; }
@@ -343,7 +341,6 @@
         <button class="btn-yes" id="yes-btn">Yes 💍</button>
         <button class="btn-no" id="no-btn">No</button>
       </div>
-      <button class="reset-box-btn" id="reset-box-btn" title="Close the box so you can open it again">↺ Reset the box</button>
     </div>
     <div class="celebration hidden" id="celebration">
       <h2>I love you, Margit 💍</h2>
@@ -883,14 +880,6 @@ ringBox.addEventListener('click', ()=>{
   if(ringPlayed) return;
   playRingAnimation();
   setVal('box-opened', 'true');
-});
-
-const resetBoxBtn = document.getElementById('reset-box-btn');
-resetBoxBtn.addEventListener('click', ()=>{
-  ringPlayed = false;
-  ringBox.classList.remove('open');
-  proposalContent.classList.remove('revealed');
-  deleteVal('box-opened');
 });
 
 function dodgeNo(){
